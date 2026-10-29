@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper, margin = 0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.5em}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{flushright}
+Lennart Oelschläger\\
+Bielefeld University, Econometrics\\
+Universitätsstraße 25, 33615 Bielefeld, Germany\\
+\texttt{lennart.oelschlaeger@uni-bielefeld.de}\\[0.3em]
+\today
+\end{flushright}
+
+Dear Editors,
+
+We herewith submit our manuscript entitled \emph{Start Smart: Better Initialization for Numerical Estimation of Multinomial Probit Models} for consideration for publication in Transportation Research Part B: Methodological.
+
+Discrete choice models are widely applied in different
+contexts within transportation science, with the
+foremost application probably being constituted by mode
+choice models. The numerical estimation of such models
+is not trivial. In particular the application of probit models has suffered from numerical complexities, such as long run times and failure to converge to the global optimum.
+
+One issue in this respect is the choice of the initial
+estimate for numerical search procedures. This paper
+contributes to the literature by proposing a new
+algorithm for providing an initial guess. The proposal
+is shown to lead to consistent estimates (under
+appropriate assumptions) while being numerically cheap
+mainly using regressions and kernels to covariance
+matrices.
+While the approach is geared towards probit models, it is also more broadly applicable.
+
+Besides the theoretical justification, the paper contains
+an extensive simulation exercise and a real-world case study,
+both showing that the method is effective.
+Therefore, we are confident that the proposed method is a significant addition to the toolbox of transportation scientists.
+
+The procedures presented are implemented in the R package Rprobit.
+Replication code and results from the paper are openly available at
+\url{https://github.com/loelschlaeger/startsmart}. The manuscript is based on
+Chapter~4 of the first author's doctoral thesis
+(Bielefeld University, 2026, \url{https://pub.uni-bielefeld.de/record/3014719})
+and is otherwise neither published nor under consideration elsewhere. Both
+authors have approved the manuscript and declare no competing interests.
+
+Sincerely,\\[0.3em]
+Lennart Oelschläger (corresponding author)\\
+Dietmar Bauer
+
+\end{document}

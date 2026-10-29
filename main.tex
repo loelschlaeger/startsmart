@@ -50,7 +50,7 @@
 
 \begin{frontmatter}
 
-\title{Start Smart: Better Initialization for Maximum Likelihood Estimation of Multinomial Probit Models}
+\title{Start Smart: Better Initialization for Numerical Estimation of Multinomial Probit Models}
 
 \author[a]{Lennart Oelschläger\corref{cor1}}
 \ead{lennart.oelschlaeger@uni-bielefeld.de}
@@ -63,7 +63,8 @@
   country={Germany}}
 
 \begin{abstract}
-Multinomial probit models are widely used for analyzing discrete choices in fields like transportation and marketing, among many others. These models are typically fitted to data by numerically maximizing the likelihood function. However, this approach can be slow and prone to convergence issues, particularly in high-dimensional settings. Convergence problems may be linked to bad initialization. As a remedy, this paper introduces initial estimators for the model parameters that are statistically consistent, fast to compute, and easy to implement. Using these estimators to initialize the optimization process substantially improves the speed and reliability of finding the maximum likelihood estimate. We demonstrate these improvements in simulations across different model specifications and in an empirical application.
+Multinomial probit models are widely used for analyzing discrete choices in transportation science. These models are typically fitted to data by
+numerically maximizing a criterion function such as the (composite marginal) likelihood function. However, this approach can be slow and prone to convergence issues, particularly in high-dimensional settings. Convergence problems may be linked to bad initialization. As a remedy, this paper introduces initial estimators for the model parameters that are statistically consistent (under appropriate assumptions), fast to compute, and easy to implement. Using these estimators to initialize the optimization process substantially improves the speed and reliability of finding the maximum likelihood estimate as is demonstrated in simulations across different model specifications as well as in an empirical application.
 \end{abstract}
 
 \begin{keyword}
@@ -74,17 +75,31 @@ multinomial probit \sep initialization \sep starting values \sep maximum likelih
 
 \section{Introduction}\label{sec:introduction}
 
-Many questions of policy and business interest concern choices among a discrete set of alternatives. Whether subsidies can drive the adoption of electric vehicles, for example, depends on how car buyers weigh characteristics of the options like the purchase price against operating cost and driving range \citep{Helveston2015}. Statistical inference on such choices typically builds upon the class of random utility models, which are fitted to observed choice data via the maximum likelihood estimation (MLE) approach or related procedures \citep[see, for example,][]{Train2009}. Among these models, the multinomial probit (MNP) model is attractive because it allows for general correlation patterns between the alternatives, such as between routes that share road segments or between similar travel modes, and for unobserved heterogeneity across deciders.
+In transportation science many research and policy questions concern choices among a discrete set of alternatives. Whether subsidies can drive the adoption of electric vehicles, for example, depends on how car buyers weigh characteristics of the options like the purchase price against operating cost and driving range \citep{Helveston2015}. Statistical inference on such choices typically builds upon the class of random utility models, which are fitted to observed choice data via the maximum likelihood estimation (MLE) approach or related procedures such as simulated maximum likelihood \citep[see, for example,][]{Train2009}. Among these models, the multinomial probit (MNP) model is attractive because it allows for general correlation patterns between the alternatives, such as between routes that share road segments or between similar travel modes, and for unobserved heterogeneity across deciders.
+ For MNP models the maximum approximate composite marginal likelihood (MACML) can be used as the criterion function \citep[see][]{Bhat2011}.
 
-This flexibility comes at a computational cost. The MNP choice probabilities are obtained as evaluations of the multidimensional Gaussian cumulative distribution function (CDF). Mathematically these are integrals that cannot be calculated analytically and must be approximated \citep[Chapter 5]{Train2009}, which makes each evaluation of the likelihood function expensive and roughens the likelihood surface \citep{Batram2023}. MLE nevertheless remains the standard approach, because it is straightforward to apply, has desirable statistical properties under certain regularity conditions, and allows for statistical inference based on the Fisher information matrix \citep[Chapter 8]{Train2009}. It requires the numerical maximization of the likelihood function, often using iterative methods like Newton--Raphson, which involves many such evaluations and does not guarantee convergence, particularly as the data dimensionality increases or random effects are included. In our simulations, optimizations started at random initial values failed to locate the maximum of the likelihood function in up to 85\% of the replications, and those that succeeded took two to four times as long as optimizations started at the initial values proposed in this paper.
+
+This flexibility comes at a computational cost: The MNP choice probabilities are obtained as evaluations of the multidimensional Gaussian cumulative distribution function (CDF). Mathematically these are integrals that cannot be calculated analytically and must be approximated \citep[Chapter 5]{Train2009}, which makes each evaluation of the likelihood function expensive and roughens the likelihood surface \citep{Batram2023}. As an alternative,
+\citet{Bhat2011} proposed the MACML approach.
+%MLE nevertheless remains the standard approach, because it is straightforward to apply, has desirable statistical properties under certain regularity conditions, and allows for statistical inference based on the Fisher information matrix \citep[Chapter 8]{Train2009}. It requires the
+
+Independent of the criterion function used, numerical maximization often uses iterative methods like Newton--Raphson, which
+%involves many such evaluations and
+does not guarantee convergence, particularly as the data dimensionality increases or random effects are included. In our simulations, optimizations started at random initial values failed to locate the maximum of the likelihood function in up to 85\% of the replications, and those that succeeded took two to four times as long as optimizations started at the initial values proposed in this paper.
 
 Prior work has mitigated these issues in two ways. The first reduces the numerical load through changes to the likelihood function: simulated maximum likelihood estimation (sMLE) replaces evaluation of the Gaussian CDF
 by a simulation approach \citep{Train2009}. Alternatively,
-composite marginal likelihood (CML) methods replace the full likelihood by a product of low-dimensional marginal likelihoods \citep{Varin2008}, and, combined with analytic approximations of the Gaussian CDF, form the maximum approximate CML approach of \citet{Bhat2011}. The second improves the numerical optimization routine, most notably through the algorithm of \citet{Bunch1993}, which is tailored to statistical estimation problems, and through the use of analytical derivatives. This paper adopts a third strategy that can be applied prior to the other two strategies and hence has value for all estimation methods. The strategy is based on two premises: First, numerical maximization of the likelihood requires a starting point. Second, the farther this starting point is from the optimum, the more iterations are generally required, and the more likely the optimizer terminates in a local optimum or in a flat region of the likelihood surface \citep{Nocedal2006}. In practical applications, prior information about the location of the optimum is vague at best. Due to a lack of guidance in the literature, a common approach therefore is to use random initial values, if necessary combined with repeated optimization from several starting points, which multiplies the computational cost. The estimates of a multinomial logit model are fast to compute and can serve as initial values for the coefficients, but they provide no information on the covariance parameters. A systematic search for starting points, for example with the genetic algorithm of \citet{Liu2000}, does not derive initial values from the data directly but searches the parameter space, at the cost of many additional evaluations of the likelihood function.
+composite marginal likelihood (CML) methods replace the full likelihood by a product of low-dimensional marginal likelihoods \citep{Varin2008}, and, combined with analytic approximations of the Gaussian CDF, form the maximum approximate CML approach of \citet{Bhat2011}.
 
-As a smarter alternative, we present initialization strategies for normally mixed MNP (nMMNP) models that meet two requirements: computing the initial values is fast relative to the optimization itself, and the initial values are close to the optimum (the estimators are consistent, that is). The strategies distinguish three types of regressors. For alternative-varying regressors with a common coefficient, an ordinary least squares (OLS) regression of dummy-encoded choices on the regressors consistently estimates the coefficient direction. For decider-specific regressors with alternative-specific coefficients, we match observed choice frequencies within local neighborhoods of the regressor to the choice probabilities implied by the model. For alternative-varying regressors with alternative-specific coefficients, we exploit that the systematic utilities shift by a common constant along one direction in the regressor space, which can be recovered from a singular value decomposition. We prove consistency of the three estimators under conditions that do not require the Gaussian error assumption. As such, the procedures are also applicable to other forms of random utility models. Conditional on the coefficient estimates, the covariance matrices of the random effects and of the error terms are initialized by a short Gibbs sampling run. The strategies are implemented in the R package Rprobit \citep{Rprobit}.
+The second approach improves the numerical optimization routine, most notably through the algorithm of \citet{Bunch1993}, which is tailored to statistical estimation problems, and through the use of analytical derivatives.
 
-The remainder of the paper is organized as follows. Section~\ref{sec:problem} formulates the optimization problem. Section~\ref{sec:initialization} derives the initial estimators and states their consistency. Section~\ref{sec:simulation} evaluates the numerical benefits in a simulation study, Section~\ref{sec:application} presents an empirical application, and Section~\ref{sec:conclusion} concludes.
+This paper adopts a third strategy that can be applied prior to the other two strategies and hence has value for all estimation methods. The strategy is based on two premises: First, numerical maximization %of the likelihood
+requires a starting point. Second, the farther this starting point is from the optimum, the more iterations are generally required, and the more likely the optimizer terminates in a local optimum or in a flat region of the likelihood surface \citep{Nocedal2006}. In practical applications, prior information about the location of the optimum is vague at best. Due to a lack of guidance in the literature, a common approach therefore is to use random initial values, if necessary combined with repeated optimization from several starting points, which multiplies the computational cost. The estimates of a multinomial logit model are fast to compute and can serve as initial values for the coefficients, but they provide no information on the covariance parameters. A systematic search for starting points, for example with the genetic algorithm of \citet{Liu2000}, does not derive initial values from the data directly but searches the parameter space, at the cost of many additional evaluations of the likelihood function.
+
+As a smarter alternative, we present initialization strategies for normally mixed MNP (nMMNP) models that meet two requirements: computing the initial values is fast relative to the optimization itself, and the initial values are close to the optimum (the estimators are consistent under appropriate assumptions, that is). The strategies distinguish three types of regressors. For alternative-varying regressors with a common coefficient, an ordinary least squares (OLS) regression of dummy-encoded choices on the regressors %consistently
+estimates the coefficient direction. For decider-specific regressors with alternative-specific coefficients, we match observed choice frequencies within local neighborhoods of the regressor to the choice probabilities implied by the model. For alternative-varying regressors with alternative-specific coefficients, we exploit that the systematic utilities shift by a common constant along one direction in the regressor space, which can be recovered from a singular value decomposition. We prove consistency of the three estimators under conditions that do not require the Gaussian error assumption. As such, the procedures are also applicable to other forms of random utility models. Conditional on the coefficient estimates, the covariance matrices of the random effects and of the error terms are initialized by a short Gibbs sampling run. The strategies are implemented in the R package Rprobit \citep{Rprobit}.
+
+The remainder of the paper is organized as follows. Section~\ref{sec:problem} formulates the optimization problem. Section~\ref{sec:initialization} derives the initial estimators and states their consistency. Section~\ref{sec:simulation} evaluates the numerical benefits in a simulation study, Section~\ref{sec:application} presents an empirical application, and Section~\ref{sec:conclusion} concludes the paper.
 
 \section{Model Setup and Estimation}\label{sec:problem}
 
@@ -92,11 +107,11 @@ The nMMNP model is based on the specification of the latent utility function.
 Let $U_{n,t,j} \in \R$ denote the latent utility of decider $n \in \{1, \dots, N\}$ in choice occasion\footnote{Throughout, we assume a balanced panel for notational convenience; however, decider-specific numbers of choice occasions are straightforward to accommodate.} $t \in \{1, \dots, T\}$ for alternative\footnote{Following \citet{Train2009}, we assume that the number of alternatives is finite, that the alternatives are mutually exclusive, and that the choice set is exhaustive.} $j \in \{1, \dots, J\}$ and $y_{n,t}$ the observed discrete choice. We assume:
 
 \begin{assumption}[Random utility]\label{asm:rum}
-$U_{n,t,j} = V_{n,t,j} + \epsilon_{n,t,j}$ for a systematic part $V_{n,t,j}$ and a random error $\epsilon_{n,t,j}$ with $\epsilon_{n,t} = \begin{bmatrix} \epsilon_{n,t,1} & \dots & \epsilon_{n,t,J} \end{bmatrix}^\top \sim \Normal{J}{0_J, \Sigma}$, independent of $V_{n,t,j}$, where $\Normal{J}{0_J, \Sigma}$ denotes the $J$-variate Gaussian distribution with expectation vector $0_J$ and covariance matrix $\Sigma$.
+$U_{n,t,j} = V_{n,t,j} + \epsilon_{n,t,j}$ for a systematic part $V_{n,t,j}$ and a random error $\epsilon_{n,t,j}$ with $\epsilon_{n,t} = \begin{bmatrix} \epsilon_{n,t,1} & \dots & \epsilon_{n,t,J} \end{bmatrix}^\top \sim \Normal{J}{0_J, \Sigma}$, independent of $V_{n,t,j}$, where $\Normal{J}{0_J, \Sigma}$ denotes the $J$-variate Gaussian distribution with expectation vector $0_J = (0,...,0)^\top \in \R^J$ and covariance matrix $\Sigma$.
 \end{assumption}
 
-\begin{assumption}[Systematic specification]\label{asm:systematic}
-$V_{n,t,j} = X_{n,t,j}^\top \beta_{n,I} + S_{n,t}^\top \beta_{n,II,j} + Z_{n,t,j}^\top \beta_{n,III,j}$ is linear in the regressors $X_{n,t,j} \in \R^{P_I}$ of type~I, $S_{n,t} \in \R^{P_{II}}$ of type~II, and $Z_{n,t,j} \in \R^{P_{III}}$ of type~III. Recoding type-II and type-III regressors using $\tilde S_{n,t,j} = S_{n,t} \otimes e_j$ where $e_j, j=1,\dots,J$ denotes the $j$-th column of the identity matrix of dimension $J$ and using $\beta_{n,II} = (\beta_{n,II,1},\dots,\beta_{n,II,J})^\top$ as well as $\tilde Z_{n,t,j} = Z_{n,t,j} \otimes e_j$ and using $\beta_{n,III} = (\beta_{n,III,1},\dots,\beta_{n,III,J})^\top$, we obtain the decider-specific coefficients $\beta_n = (\beta_{n,I}^\top,\beta_{n,II}^\top,\beta_{n,III}^\top)^\top \sim \Normal{P}{b, \Omega}$ (where $P=P_I+(J-1)P_{II}+JP_{III}$), which are independently and identically distributed across deciders and independent of $\epsilon_{n,t}$.
+\begin{assumption}[Specification of the systematic component]\label{asm:systematic}
+$V_{n,t,j} = X_{n,t,j}^\top \beta_{n,I} + S_{n,t}^\top \beta_{n,II,j} + Z_{n,t,j}^\top \beta_{n,III,j}$ is linear in the regressors $X_{n,t,j} \in \R^{P_I}$ of type~I, $S_{n,t} \in \R^{P_{II}}$ of type~II, and $Z_{n,t,j} \in \R^{P_{III}}$ of type~III. Recoding type-II and type-III regressors using $\tilde S_{n,t,j} = S_{n,t} \otimes e_j$ where $e_j, j=2,\dots,J$ denotes the $j$-th column of the identity matrix of dimension $J$ and using $\beta_{n,II} = (\beta_{n,II,2},\dots,\beta_{n,II,J})^\top$ (where $\beta_{n,II,1}=0$ for identifiability) as well as $\tilde Z_{n,t,j} = Z_{n,t,j} \otimes e_j$ and using $\beta_{n,III} = (\beta_{n,III,1},\dots,\beta_{n,III,J})^\top$, we obtain the decider-specific coefficients $\beta_n = (\beta_{n,I}^\top,\beta_{n,II}^\top,\beta_{n,III}^\top)^\top \sim \Normal{P}{b, \Omega}$ (where $P=P_I+(J-1)P_{II}+JP_{III}$), which are independently and identically distributed across deciders and independent of $\epsilon_{n,t}$.
 \end{assumption}
 
 \begin{assumption}[Rationality]\label{asm:rationality}
@@ -171,7 +186,7 @@ Since $\mathcal{P}(\argmax_{\theta \in \R^q}l(\theta)) = \hat{\Theta}$, where
     l(\theta) \coloneq \log \mathcal{L}_{\mathcal{P}(\theta)}(\bm{y} \mid \bm{X}) = \sum_{\substack{n = 1,\dots,N \\ \bm{j} \in \{1,\dots,J\}^T}} 1(\bm{y}_n = \bm{j}) \log \Pr \left( \bm{y}_n = \bm{j} \mid \bm{X}_n, \mathcal{P}(\theta) \right)
 \end{align}
 %
-denotes the log-likelihood function. We can numerically optimize \eqref{eq:ll} over $\R^q$ to find the solution of \eqref{eq:mle}. Iterative procedures essentially consist of three steps:
+denotes the log-likelihood function, we can numerically optimize \eqref{eq:ll} over $\R^q$ to find the solution of \eqref{eq:mle}. Iterative procedures essentially consist of three steps:
 %
 \begin{enumerate}
     \item Choose an initial value $\theta^{(0)}$, define termination criteria, and set $i = 1$.
@@ -179,11 +194,12 @@ denotes the log-likelihood function. We can numerically optimize \eqref{eq:ll} o
     \item Check whether any termination criterion is satisfied. If so, return $\theta^{(i)}$; otherwise, increment the iteration counter $i$ by 1 and restart at step 2.
 \end{enumerate}
 %
-The definition of $\mathcal{T}$ depends on the optimization algorithm. In any case, the choice of the initial estimate $\theta^{(0)}$ is important for the success and the numerical load of the optimization.
+The definition of $\mathcal{T}$ depends on the optimization algorithm. The criterion function $l$ can also be defined using the CML~\eqref{eq:cml}.
+In any case, the choice of the initial estimate $\theta^{(0)}$ is important for the success and the numerical load of the optimization.
 
 \section{Proposed Initialization}\label{sec:initialization}
 
-We now propose initial values $\theta^{(0)}$ for the model parameters $\mathcal{P}(\theta^{(0)}) = \{b, \Omega, \Sigma \}$ having two goals in mind. First, computing $\theta^{(0)}$ is fast relative to solving \eqref{eq:mle}, ensuring that applying the strategy is computationally worthwhile. Second, $\theta^{(0)}$ is close to $\hat{\theta} = \argmax_\theta l(\theta)$, with improved optimization compared to random initialization as a consequence. We proceed in two steps. The coefficient vector $b$ is initialized first, and the covariance matrices $\Omega$ and $\Sigma$ are initialized conditional on this estimate.
+When proposing initial values $\theta^{(0)}$ for the model parameters $\mathcal{P}(\theta^{(0)}) = \{b, \Omega, \Sigma \}$ we have two goals in mind. First, computing $\theta^{(0)}$ is fast relative to solving \eqref{eq:mle}, ensuring that applying the strategy is computationally worthwhile. Second, $\theta^{(0)}$ is close to $\hat{\theta} = \argmax_\theta l(\theta)$, with improved optimization compared to random initialization as a consequence. We proceed in two steps. The coefficient vector $b$ is initialized first, and the covariance matrices $\Omega$ and $\Sigma$ are initialized conditional on this estimate.
 
 For the first step, we distinguish three types of regressors in the systematic utility:
 %
@@ -203,7 +219,7 @@ $U_{n,t,j} = V_{n,t,j} + \epsilon_{n,t,j}$ for a systematic part $V_{n,t,j}$ and
 $V_{n,t,j} = \tilde X_{n,t,j}^\top b$ is linear in the regressors $\tilde X_{n,t,j} \in \R^{P}$, with coefficients $b$ that are constant across deciders.
 \end{assumptionvar}
 
-For type-I and type-III coefficients, the initialization exploits that choice probabilities are constant along directions that leave utility differences unchanged. Figure~\ref{fig:illustration} illustrates this for $J = 2$ alternatives, where only the utility difference $\Delta_2 V = V_1 - V_2$ matters. For two \mbox{type-I} regressors $X_1$ and $X_2$ of the first alternative with coefficient $\beta^{(1)}$ and the systematic utility of the second alternative fixed at zero, $\Delta_2 V = X_1 \beta^{(1)}_1 + X_2 \beta^{(1)}_2$ is constant along lines orthogonal to $\beta^{(1)}$. Section~\ref{sec:type1} estimates the direction of $\beta^{(1)}$ by OLS. For a single type-III regressor with values $X_1$ and $X_2$ for the two alternatives and coefficient $\beta^{(3)}$, $\Delta_2 V = X_1 \beta^{(3)}_1 - X_2 \beta^{(3)}_2$ is constant along lines parallel to $s = \begin{bmatrix} 1/\beta^{(3)}_1 & 1/\beta^{(3)}_2 \end{bmatrix}^\top$, and Section~\ref{sec:type3} estimates the direction of $s$ by a singular value decomposition. For type-II coefficients, Section~\ref{sec:type2} instead matches choice frequencies within local neighborhoods of the regressor to the model's choice probabilities.
+For type-I and type-III coefficients, the initialization exploits that choice probabilities are constant along directions that leave utility differences unchanged. Figure~\ref{fig:illustration} illustrates this for $J = 2$ alternatives, where only the utility difference $\Delta_2 V = V_1 - V_2$ matters. For two \mbox{type-I} regressors $X_1$ and $X_2$ of the first alternative with coefficient $\beta^{(1)}$ and the systematic utility of the second alternative fixed at zero, $\Delta_2 V = X_1 \beta^{(1)}_1 + X_2 \beta^{(1)}_2$ is constant along lines (in $(X_1,X_2) \in \R^2$ space) orthogonal to $\beta^{(1)}$. Section~\ref{sec:type1} estimates the direction of $\beta^{(1)}$ by OLS. For a single type-III regressor with values $X_1$ for the first alternative and $X_2$ for the second alternative, and with coefficient $\beta^{(3)}$, the difference in systematic utility $\Delta_2 V = X_1 \beta^{(3)}_1 - X_2 \beta^{(3)}_2$ is constant along lines parallel to $s = \begin{bmatrix} 1/\beta^{(3)}_1 & 1/\beta^{(3)}_2 \end{bmatrix}^\top$, and Section~\ref{sec:type3} estimates the direction of $s$ by a singular value decomposition. For type-II coefficients, Section~\ref{sec:type2} instead matches choice frequencies within local neighborhoods of the regressor to the model's choice probabilities.
 
 \begin{figure}[htb]
     \centering
@@ -304,7 +320,7 @@ Algorithm~\ref{alg:type1init} states the procedure for arbitrary $J \geq 2$ and 
 %
 \begin{itemize}
     \item Normality in Assumption~\ref{asm:type1reg} is sufficient but not necessary. The proof only uses that the regressor directions which are uncorrelated with the systematic utility have conditional mean zero given the systematic utility.
-    \item The arguments do not invoke the specific form of $F_\epsilon$. Consistency therefore also holds for the multinomial logit specification, for arbitrary error covariances $\Var(\epsilon_{n,t}) = \Sigma$, in the presence of ASCs, and in the presence of additional type-II or type-III regressors, provided these enter utility linearly and are independent of the type-I regressors.
+    \item The arguments do not invoke the specific form of $F_\epsilon$. Consistency therefore also holds for the multinomial logit specification; for arbitrary error covariances $\Var(\epsilon_{n,t}) = \Sigma$, even heteroskedastic ones; in the presence of ASCs; and in the presence of additional type-II or type-III regressors, provided these enter utility linearly and are independent of the type-I regressors.
 \end{itemize}
 
 \begin{algorithm}[htbp]
@@ -367,6 +383,7 @@ Instead, assume that a sample is given with fixed regressor value $x_{n,t} = x^\
 %
 of the Euclidean distance between the observed (local to $x^*$) choice frequencies $\hat{f}(x^*)$ derived from $\bm{y}$ and the predicted choice probabilities. Then $\hat{s}(x^\ast) / x^\ast$ estimates $\beta^{(2)}_{-1}$. If $x_{n,t}$ takes a small number $K$ of different values, \eqref{eq:matching} analogously yields $K$ estimates, with the average being again consistent.\footnote{Note that constant $x^\ast = 1$ is equivalent to ASCs, while a finite number of values typically occurs for decider-specific characteristics like household size or age.} If the regressor is continuous, consistency can be achieved by localization, for example by $k$-means clustering \citep{Hartigan1979}, provided the number of observations in each cluster grows without bound and the within-cluster variances approach zero.
 
+
 \begin{theorem} \label{thm:type2}
 Consider the random utility system for $J$ alternatives and alternative-varying coefficients connected to alternative-constant regressors, i.e.,
 %
@@ -414,6 +431,7 @@ Algorithm~\ref{alg:type2initsingle} summarizes the procedure. In our implementat
 \begin{itemize}
     \item Since the probability map $p_{-1}$ is invoked, the theorem assumes that $F_\epsilon$ is specified correctly. If $\Sigma$ is unknown, or the data generating process (DGP) is not MNP, the MNP probabilities with $\Sigma = I_J$ can still serve as an approximation of the true probability map.
     \item The optimization step in line~\ref{algline:type2opt} of Algorithm~\ref{alg:type2initsingle} again requires numerical optimization. It is, however, much cheaper than full MLE, since the objective is only $(J-1)$-dimensional and each evaluation requires only $J$ Gaussian CDFs of dimension $J-1$.
+    \item The clustering step can be replaced by a kernel estimator. Then the bandwidth choice replaces the choice of the number of clusters $K$.
     \item If multiple type-II regressors are present, the same steps can be conducted separately for each regressor after orthogonalization, see Algorithm~\ref{alg:type2init}.
 \end{itemize}
 
@@ -459,7 +477,7 @@ Note that this step ignores the existence of other type-I or type-III regressors
 
 Regressors of the third type vary across alternatives (as type-I) and are connected to alternative-specific coefficients (as type-II). Each type-III regressor can be expressed by $J$ type-I coefficients, analogous to \eqref{eq:type2system}, but with non-constant entries in the diagonal design matrix. This makes it clear that the regression approach of Section~\ref{sec:type1} is unsuitable for the same reason noted in Section~\ref{sec:type2}, while the method of choice frequency matching of Section~\ref{sec:type2} becomes infeasible due to the need for multi-dimensional localization. Instead, another model structure can be exploited.
 
-Consider $V_{n,t,j} = X_{n,t,j} \beta^{(3)}_j$ for $j = 1,\dots,J$. Since $(X_{n,t,j} + c / \beta^{(3)}_j) \beta^{(3)}_j = V_{n,t,j} + c$ for any $c \in \R$, all systematic utilities shift by the same constant along the direction $s = \begin{bmatrix} 1/\beta^{(3)}_1 & \dots & 1/\beta^{(3)}_J \end{bmatrix}^\top$ in the regressor space, and utility differences remain unchanged. In a correctly specified model, the choice probabilities are therefore constant along this direction. For given data, this motivates identifying the direction along which the empirical covariance between dummy-encoded choices and regressors is approximately zero, which is spanned by the right singular vector of the covariance matrix associated with its smallest singular value. The element-wise inverse of this vector estimates the direction of $\beta^{(3)}$.
+Consider $V_{n,t,j} = X_{n,t,j} \beta^{(3)}_j$ for $j = 1,\dots,J$. Since $(X_{n,t,j} + c / \beta^{(3)}_j) \beta^{(3)}_j = V_{n,t,j} + c$ for any $c \in \R$, all systematic utilities shift by the same constant along the direction $s = \begin{bmatrix} 1/\beta^{(3)}_1 & \dots & 1/\beta^{(3)}_J \end{bmatrix}^\top$ in the regressor space, and utility differences remain unchanged, compare Figure~\ref{fig:illustration}. In a correctly specified model, the choice probabilities are therefore constant along this direction. For given data, this motivates identifying the direction along which the empirical covariance between dummy-encoded choices and regressors is approximately zero, which is spanned by the right singular vector of the covariance matrix associated with its smallest singular value. The element-wise inverse of this vector estimates the direction of $\beta^{(3)}$.
 
 \begin{theorem} \label{thm:type3}
 Consider the utilities $U_{n,t,j}=V_{n,t,j}+\epsilon_{n,t,j}$, $V_{n,t,j}=X_{n,t,j}\beta^{(3)}_j$, $j\in\{1,\dots,J\}$, with type-III coefficient $\beta^{(3)} = \begin{bmatrix}\beta^{(3)}_1&\dots&\beta^{(3)}_J\end{bmatrix}^\top \in \R^J$, $\norm{\beta^{(3)}}=1$ and $\beta^{(3)}_1>0$ for identification, and dummy-encoded choices $y^d_{n,t}$. Define $\tilde X_{n,t}=X_{n,t}-\E(X_{n,t})$, $\tilde y^d_{n,t}=y^d_{n,t}-\E(y^d_{n,t})$, and $p(x)=\E(\tilde y^d_{n,t}\mid \tilde X_{n,t}=x)$, where $X_{n,t}=\begin{bmatrix}X_{n,t,1} & \dots & X_{n,t,J}\end{bmatrix}^\top$. Let Assumptions~\asmstar{1}, \asmstar{2}, and \ref{asm:rationality} hold and assume that
@@ -467,13 +485,13 @@ Consider the utilities $U_{n,t,j}=V_{n,t,j}+\epsilon_{n,t,j}$, $V_{n,t,j}=X_{n,t
 \begin{description}
   \asmitemvar{\asmstar{\ref*{asm:type1coef}}}\label{asm:type3coef} $\beta^{(3)}_j \neq 0$ for all $j \in \{1,\dots,J\}$,
   \asmitemvar{\asmstar{\ref*{asm:type2moment}}}\label{asm:type3moment} $\E (\norm{X_{n,t}}^2) < \infty$,
-  \asmitem\label{asm:type3proj} for $s\in\R^J$ with $s_j=1/\beta^{(3)}_j$, there exists a linear projection $\Pi_s$ onto the space spanned by $s$ such that, with $\Pi_\perp = I_J-\Pi_s$, one has the decomposition
+  \asmitem\label{asm:type3proj} For $s\in\R^J$ with $s_j=1/\beta^{(3)}_j$, there exists a linear projection $\Pi_s$ onto the space spanned by $s$ such that, with $\Pi_\perp = I_J-\Pi_s$, one has the decomposition
   $\tilde X_{n,t}=\Pi_s\tilde X_{n,t}+\Pi_\perp \tilde X_{n,t}$ where  $\Pi_s\tilde X_{n,t}$ is independent of $\Pi_\perp \tilde X_{n,t}$,
   \asmitem\label{asm:type3rank} $M = \E ( \tilde y^d_{n,t} \tilde X_{n,t}^\top ) \in\R^{J\times J}$ has rank $J-1$.
 \end{description}
 %
-Let $\widehat{M} = (NT)^{-1} \sum_{n,t} \tilde y^d_{n,t}\,(\tilde X_{n,t})^\top$, $v$ be the unit right singular vector of $\widehat{M}$ associated with its smallest singular value such that $v_1 > 0$, and
-$\hat\beta = \begin{bmatrix} v_1^{-1} & \dots & v_J^{-1} \end{bmatrix}^\top$. Then $$ \hat{\beta} \, / \, \norm{\hat{\beta}} \pto \beta^{(3)}.$$
+Let $\widehat{M} = (NT)^{-1} \sum_{n,t} \tilde y^d_{n,t}\,(\tilde X_{n,t})^\top$, $\hat v$ be the unit right singular vector of $\widehat{M}$ associated with its smallest singular value such that $\hat v_1 > 0$, and
+$\hat\beta = \begin{bmatrix} \hat v_1^{-1} & \dots & \hat v_J^{-1} \end{bmatrix}^\top$. Then $$ \hat{\beta} \, / \, \norm{\hat{\beta}} \pto \beta^{(3)}.$$
 \end{theorem}
 
 \begin{proof}
@@ -491,11 +509,11 @@ and by the law of iterated expectation,
 Since $\Pi_s s = s$, we have $M s = 0_{J}$, hence $s$ lies in the kernel of $M$. As $M$ has rank $J - 1$ by Assumption~\ref{asm:type3rank}, $s$ spans the kernel of $M$.
 
 By Assumption~\ref{asm:type3moment}
-and the law of large numbers, $\widehat{M} \pto M$ as $NT\to\infty$. Let $v$ be the unit right singular vector of $\widehat{M}$ associated with its smallest singular value such that $v_1 > 0$, then $v \pto s\, /\, \norm{s}$. Let
-$\hat\beta = \begin{bmatrix} v_1^{-1} & \dots & v_J^{-1} \end{bmatrix}^\top$, then $$ \hat{\beta} \, / \, \norm{\hat{\beta}} \pto \beta^{(3)}.$$
+and the law of large numbers, $\widehat{M} \pto M$ as $NT\to\infty$. Let $\hat v$ be the unit right singular vector of $\widehat{M}$ associated with its smallest singular value such that $\hat v_1 > 0$, then $\hat v \pto s\, /\, \norm{s}$. Let
+$\hat\beta = \begin{bmatrix} \hat v_1^{-1} & \dots & \hat v_J^{-1} \end{bmatrix}^\top$, then $$ \hat{\beta} \, / \, \norm{\hat{\beta}} \pto \beta^{(3)}.$$
 \end{proof}
 
-Algorithm~\ref{alg:type3init} summarizes the procedure, which only requires a singular value decomposition of a $J \times J$ matrix and hence is computed very fast. The singular vector $v$ is determined up to its sign only, and so is $\hat{\beta}$. The theorem resolves this ambiguity through $v_1 > 0$, which presumes that the sign of $\beta^{(3)}_1$ is known. The implementation instead infers the sign from the data. The diagonal element $\widehat{M}_{jj}$ is the empirical covariance between the regressor of alternative $j$ and the indicator of choosing alternative $j$. If $\beta^{(3)}_j > 0$, a larger value of this regressor raises the utility of alternative $j$ and thereby its choice probability, so that $M_{jj} > 0$, and if $\beta^{(3)}_j < 0$, then $M_{jj} < 0$. Under the true coefficients, $M_{jj} \beta^{(3)}_j$ is therefore positive for every $j$, and of the two candidates $\hat{\beta}$ and $-\hat{\beta}$ the implementation selects the one that satisfies $\sum_j \widehat{M}_{jj} \hat{\beta}_j > 0$. We note:
+Algorithm~\ref{alg:type3init} summarizes the procedure, which only requires a singular value decomposition of a $J \times J$ matrix and hence is computed very fast. The singular vector $\hat v$ is determined up to its sign only, and so is $\hat{\beta}$. The theorem resolves this ambiguity through $\hat v_1 > 0$, which presumes that the sign of $\beta^{(3)}_1$ is known. The implementation instead infers the sign from the data. The diagonal element $\widehat{M}_{jj}$ is the empirical covariance between the regressor of alternative $j$ and the indicator of choosing alternative $j$. If $\beta^{(3)}_j > 0$, a larger value of this regressor raises the utility of alternative $j$ and thereby its choice probability, so that $M_{jj} > 0$, and if $\beta^{(3)}_j < 0$, then $M_{jj} < 0$. Under the true coefficients, $M_{jj} \beta^{(3)}_j$ is therefore positive for every $j$, and of the two candidates $\hat{\beta}$ and $-\hat{\beta}$ the implementation selects the one that satisfies $\sum_j \widehat{M}_{jj} \hat{\beta}_j > 0$. We note:
 %
 \begin{itemize}
     \item Independence between $\Pi_s \tilde{X}_{n,t}$ and $\Pi_\perp \tilde{X}_{n,t}$
@@ -520,8 +538,8 @@ Algorithm~\ref{alg:type3init} summarizes the procedure, which only requires a si
         \ENDIF
         \STATE $\widehat{M} \leftarrow \Cov(\bm{y}^d,\ \bm{X}_{\cdot, p})$
         \STATE compute singular value decomposition $\widehat{M} = UDV^\top$
-        \STATE identify $v \in \R^J$ as the unit right singular vector of $\widehat{M}$ associated with its smallest singular value
-        \STATE $\widehat{\beta^{(3,p)}} \leftarrow v^{-1} / \norm{v^{-1}}$ ($v^{-1}$ denotes the element-wise inverse of $v$), with the sign of $v$ chosen such that $\sum_j \widehat{M}_{jj} \widehat{\beta^{(3,p)}_j} > 0$
+        \STATE identify $\hat v \in \R^J$ as the unit right singular vector of $\widehat{M}$ associated with its smallest singular value
+        \STATE $\widehat{\beta^{(3,p)}} \leftarrow \hat v^{-1} / \norm{\hat v^{-1}}$ ($\hat v^{-1}$ denotes the element-wise inverse of $\hat v$), with the sign of $\hat v$ chosen such that $\sum_j \widehat{M}_{jj} \widehat{\beta^{(3,p)}_j} > 0$
       \ENDFOR
       \IF{$P_{III} > 1$}
       \STATE transform $\bm{X}$, $\widehat{\beta^{(3)}} = \begin{bmatrix} \widehat{\beta^{(3,1)}} & \dots & \widehat{\beta^{(3,P_{III})}} \end{bmatrix}^\top$ into a type-I system ${\tilde{\bm{X}} = \bm{X} \widehat{\beta^{(3)}}}$
@@ -539,7 +557,7 @@ Algorithm~\ref{alg:type3init} summarizes the procedure, which only requires a si
 
 If regressors of several types are present, or several type-II or type-III regressors, the estimators of Sections~\ref{sec:type1} to \ref{sec:type3} are applied after orthogonalization, following the idea of the Frisch--Waugh--Lovell theorem \citep{Frisch1933}. The group of type-I regressors is regressed on all remaining regressors, and each type-II and type-III regressor on all other regressors, and the estimators are applied to the residuals. For the type-I and type-III steps, the dummy-encoded choices are residualized in the same way; for the type-II step, the choices are kept unchanged to preserve proper choice frequencies.
 
-Each of the resulting estimates is normalized and hence identified up to scale only, while the relative scales between the regressors are needed. To determine them, each regressor block is collapsed into a single composite type-I regressor using its estimate, and the type-I system
+Each of the resulting estimates is normalized and hence identified up to scale only, while the relative scales between the regressors are to be estimated. To determine them, each regressor block is collapsed into a single composite type-I regressor using its estimate, and the type-I system
 %
 \begin{multline}
     \label{eq:commonscale}
@@ -600,7 +618,9 @@ The sampler is initialized at $\tilde{\Sigma} = I_{J-1}$, $\beta_n = \hat{b}$, a
 
 \subsection{Design}
 
-We evaluate the numerical benefits of the proposed initialization in six simulation scenarios, which are summarized in Table~\ref{tab:scenarios}. Scenarios S1 to S4 are cross-sectional with $N = 5{,}000$ deciders, $J = 5$ alternatives, and fixed coefficients of a single type (S1 to S3) or of all three types (S4). Scenarios S5 and S6 are panel settings with $N = 200$ deciders in $T = 10$ choice occasions and correlated Gaussian random effects. In each replication, the regressor values and the DGP parameters $\theta_\text{DGP}$ are drawn independently from standard normal distributions, and choices are generated from the nMMNP model with unrestricted covariance matrices $\tilde{\Sigma}$ and $\Omega$. The utility level is fixed by expressing utilities relative to the first alternative, the utility scale by $\tilde{\Sigma}_{1,1} = [\Delta_1 \Sigma \Delta_1^\top]_{1,1} = 1$.
+We evaluate the numerical benefits of the proposed initialization in six simulation scenarios, which are summarized in Table~\ref{tab:scenarios}. Scenarios S1 to S4 are cross-sectional with $N = 5{,}000$ deciders, $J = 5$ alternatives, and fixed coefficients of a single type (S1 to S3) or of all three types (S4). Scenarios S5 and S6 are panel settings with $N = 200$ deciders in $T = 10$ choice occasions and correlated Gaussian random effects.
+The scenarios contain between $q=19$ (S1) and $q=39$ (S4) parameters.
+In each replication, the regressor values and the DGP parameters $\theta_\text{DGP}$ are drawn independently from standard normal distributions, and choices are generated from the nMMNP model with unrestricted covariance matrices $\tilde{\Sigma}$ and $\Omega$. The utility level is fixed by expressing utilities relative to the first alternative, the utility scale by $\tilde{\Sigma}_{1,1} = [\Delta_1 \Sigma \Delta_1^\top]_{1,1} = 1$.
 
 \begin{table}[htb]
     \centering
@@ -662,7 +682,7 @@ The proposed initialization failed in three replications overall, one each in S2
 
 \section{Empirical Application}\label{sec:application}
 
-We now demonstrate the initialization on an empirical data set, a panel with correlated random coefficients. The purpose is to show how it behaves on data that were not generated by the model.
+We now demonstrate the initialization on an empirical data set, a panel with correlated random coefficients. The purpose is to show how it behaves on data that were not generated by the model and also do not satisfy all assumptions of the theorems above.
 
 \begin{table}[htb]
     \centering

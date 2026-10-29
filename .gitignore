@@ -20,4 +20,8 @@
 *.synctex.gz
 *.toc
 *-SAVE-ERROR
+
+# rendered pdfs
 main.pdf
+submission/cover_letter.pdf
+submission/title_page.pdf
