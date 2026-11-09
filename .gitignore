@@ -19,6 +19,7 @@
 *.run.xml
 *.synctex.gz
 *.toc
+*.spl
 *-SAVE-ERROR
 
 # rendered pdfs

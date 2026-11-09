@@ -107,7 +107,7 @@ The nMMNP model is based on the specification of the latent utility function.
 Let $U_{n,t,j} \in \R$ denote the latent utility of decider $n \in \{1, \dots, N\}$ in choice occasion\footnote{Throughout, we assume a balanced panel for notational convenience; however, decider-specific numbers of choice occasions are straightforward to accommodate.} $t \in \{1, \dots, T\}$ for alternative\footnote{Following \citet{Train2009}, we assume that the number of alternatives is finite, that the alternatives are mutually exclusive, and that the choice set is exhaustive.} $j \in \{1, \dots, J\}$ and $y_{n,t}$ the observed discrete choice. We assume:
 
 \begin{assumption}[Random utility]\label{asm:rum}
-$U_{n,t,j} = V_{n,t,j} + \epsilon_{n,t,j}$ for a systematic part $V_{n,t,j}$ and a random error $\epsilon_{n,t,j}$ with $\epsilon_{n,t} = \begin{bmatrix} \epsilon_{n,t,1} & \dots & \epsilon_{n,t,J} \end{bmatrix}^\top \sim \Normal{J}{0_J, \Sigma}$, independent of $V_{n,t,j}$, where $\Normal{J}{0_J, \Sigma}$ denotes the $J$-variate Gaussian distribution with expectation vector $0_J = (0,...,0)^\top \in \R^J$ and covariance matrix $\Sigma$.
+$U_{n,t,j} = V_{n,t,j} + \epsilon_{n,t,j}$ for a systematic part $V_{n,t,j}$ and a random error $\epsilon_{n,t,j}$ with $\epsilon_{n,t} = \begin{bmatrix} \epsilon_{n,t,1} & \dots & \epsilon_{n,t,J} \end{bmatrix}^\top \sim \Normal{J}{0_J, \Sigma}$, independent of $V_{n,t,j}$, where $\Normal{J}{0_J, \Sigma}$ denotes the $J$-variate Gaussian distribution with expectation vector $0_J = (0,\dots,0)^\top \in \R^J$ and covariance matrix $\Sigma$.
 \end{assumption}
 
 \begin{assumption}[Specification of the systematic component]\label{asm:systematic}
@@ -485,7 +485,7 @@ Consider the utilities $U_{n,t,j}=V_{n,t,j}+\epsilon_{n,t,j}$, $V_{n,t,j}=X_{n,t
 \begin{description}
   \asmitemvar{\asmstar{\ref*{asm:type1coef}}}\label{asm:type3coef} $\beta^{(3)}_j \neq 0$ for all $j \in \{1,\dots,J\}$,
   \asmitemvar{\asmstar{\ref*{asm:type2moment}}}\label{asm:type3moment} $\E (\norm{X_{n,t}}^2) < \infty$,
-  \asmitem\label{asm:type3proj} For $s\in\R^J$ with $s_j=1/\beta^{(3)}_j$, there exists a linear projection $\Pi_s$ onto the space spanned by $s$ such that, with $\Pi_\perp = I_J-\Pi_s$, one has the decomposition
+  \asmitem\label{asm:type3proj} for $s\in\R^J$ with $s_j=1/\beta^{(3)}_j$, there exists a linear projection $\Pi_s$ onto the space spanned by $s$ such that, with $\Pi_\perp = I_J-\Pi_s$, one has the decomposition
   $\tilde X_{n,t}=\Pi_s\tilde X_{n,t}+\Pi_\perp \tilde X_{n,t}$ where  $\Pi_s\tilde X_{n,t}$ is independent of $\Pi_\perp \tilde X_{n,t}$,
   \asmitem\label{asm:type3rank} $M = \E ( \tilde y^d_{n,t} \tilde X_{n,t}^\top ) \in\R^{J\times J}$ has rank $J-1$.
 \end{description}
