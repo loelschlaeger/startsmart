@@ -461,7 +461,7 @@ Algorithm~\ref{alg:type2initsingle} summarizes the procedure. In our implementat
       \STATE orthogonalize $\bm{X}_{p}$ with respect to $\bm{X}_{-p}$
       \STATE calculate $\widehat{\beta^{(2,p)}}$ via Algorithm~\ref{alg:type2initsingle}
     \ENDFOR
-    \STATE transform $\bm{X}$, $\widehat{\beta^{(2)}} = \begin{bmatrix} \widehat{\beta^{(2,1)}} & \dots & \widehat{\beta^{(2,P_{II})}} \end{bmatrix}^\top$ into a type-I system ${\tilde{\bm{X}} = \bm{X} \widehat{\beta^{(2)}}}$ with one composite regressor per type-II regressor, which takes the value zero for the reference alternative
+    \STATE transform $\bm{X}$ into a type-I system $\tilde{\bm{X}} \in \R^{NTJ \times P_{II}}$ with $p$-th column ${\operatorname{vec}\Bigl(\begin{bmatrix} 0 \\ \widehat{\beta^{(2,p)}} \end{bmatrix} \bm{X}_{p}^\top\Bigr)}$
     \STATE obtain scale factors $\hat{\gamma} \in \R^{P_{II}}$ for $\bm{X} = \tilde{\bm{X}}$ via Algorithm~\ref{alg:type1init}
     \FOR{$p=1,\dots,P_{II}$}
       \STATE rescale $\widehat{\beta^{(2,p)}} \leftarrow \widehat{\beta^{(2,p)}} \cdot \hat{\gamma}_p$
@@ -542,7 +542,7 @@ Algorithm~\ref{alg:type3init} summarizes the procedure, which only requires a si
         \STATE $\widehat{\beta^{(3,p)}} \leftarrow \hat v^{-1} / \norm{\hat v^{-1}}$ ($\hat v^{-1}$ denotes the element-wise inverse of $\hat v$), with the sign of $\hat v$ chosen such that $\sum_j \widehat{M}_{jj} \widehat{\beta^{(3,p)}_j} > 0$
       \ENDFOR
       \IF{$P_{III} > 1$}
-      \STATE transform $\bm{X}$, $\widehat{\beta^{(3)}} = \begin{bmatrix} \widehat{\beta^{(3,1)}} & \dots & \widehat{\beta^{(3,P_{III})}} \end{bmatrix}^\top$ into a type-I system ${\tilde{\bm{X}} = \bm{X} \widehat{\beta^{(3)}}}$
+      \STATE transform $\bm{X}$ into a type-I system $\tilde{\bm{X}} \in \R^{NTJ \times P_{III}}$ with $p$-th column $\operatorname{vec}\bigl(\operatorname{diag}(\widehat{\beta^{(3,p)}})\, \bm{X}_{\cdot,p}^\top\bigr)$
     \STATE obtain scale factors $\hat{\gamma} \in \R^{P_{III}}$ for $\bm{X} = \tilde{\bm{X}}$ via Algorithm~\ref{alg:type1init}
     \FOR{$p=1,\dots,P_{III}$}
       \STATE rescale $\widehat{\beta^{(3,p)}} \leftarrow \widehat{\beta^{(3,p)}} \cdot \hat{\gamma}_p$
