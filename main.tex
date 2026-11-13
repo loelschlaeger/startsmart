@@ -466,8 +466,8 @@ Algorithm~\ref{alg:type2initsingle} summarizes the procedure. In our implementat
     \FOR{$p=1,\dots,P_{II}$}
       \STATE rescale $\widehat{\beta^{(2,p)}} \leftarrow \widehat{\beta^{(2,p)}} \cdot \hat{\gamma}_p$
     \ENDFOR
-    \STATE normalize $\begin{bmatrix} \widehat{\beta^{(2,1)}} & \dots & \widehat{\beta^{(2,P_{II})}} \end{bmatrix}^\top$ to unit length
-    \ENSURE initial estimate $\begin{bmatrix} \widehat{\beta^{(2,1)}} & \dots & \widehat{\beta^{(2,P_{II})}} \end{bmatrix}^\top$ for the direction of $\beta^{(2)}$
+    \STATE normalize $\begin{bmatrix} {\widehat{\beta^{(2,1)}}}^\top & \dots & {\widehat{\beta^{(2,P_{II})}}}^\top \end{bmatrix}^\top$ to unit length
+    \ENSURE initial estimate $\begin{bmatrix} {\widehat{\beta^{(2,1)}}}^\top & \dots & {\widehat{\beta^{(2,P_{II})}}}^\top \end{bmatrix}^\top$ for the direction of $\beta^{(2)}$
   \end{algorithmic}
 \end{algorithm}
 
@@ -548,8 +548,8 @@ Algorithm~\ref{alg:type3init} summarizes the procedure, which only requires a si
       \STATE rescale $\widehat{\beta^{(3,p)}} \leftarrow \widehat{\beta^{(3,p)}} \cdot \hat{\gamma}_p$
     \ENDFOR
     \ENDIF
-    \STATE normalize $\begin{bmatrix} \widehat{\beta^{(3,1)}} & \dots & \widehat{\beta^{(3,P_{III})}} \end{bmatrix}^\top$ to unit length
-    \ENSURE initial estimate $\begin{bmatrix} \widehat{\beta^{(3,1)}} & \dots & \widehat{\beta^{(3,P_{III})}} \end{bmatrix}^\top$ for the direction of $\beta^{(3)}$
+    \STATE normalize $\begin{bmatrix} {\widehat{\beta^{(3,1)}}}^\top & \dots & {\widehat{\beta^{(3,P_{III})}}}^\top \end{bmatrix}^\top$ to unit length
+    \ENSURE initial estimate $\begin{bmatrix} {\widehat{\beta^{(3,1)}}}^\top & \dots & {\widehat{\beta^{(3,P_{III})}}}^\top \end{bmatrix}^\top$ for the direction of $\beta^{(3)}$
   \end{algorithmic}
 \end{algorithm}
 
